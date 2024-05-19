@@ -1,4 +1,6 @@
+import * as Yup from 'yup';
 import { useState } from 'react';
+import { Form, useFormik, FormikProvider } from 'formik';
 
 import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
@@ -17,6 +19,8 @@ import { bgGradient } from 'src/theme/css';
 
 import Iconify from 'src/components/iconify';
 
+
+
 // ----------------------------------------------------------------------
 
 export default function LoginView() {
@@ -25,6 +29,23 @@ export default function LoginView() {
   const router = useRouter();
 
   const [showPassword, setShowPassword] = useState(false);
+
+  const userSchema = Yup.object({
+    email: Yup.string().email('Invalid email address').required('Email is required'),
+    password: Yup.string().required('Password is required'),
+  });
+
+  
+  const formik = useFormik({
+    initialValues: {
+      email: '',
+      password: '',
+    },
+    validationSchema: userSchema,
+    onSubmit: (values) => {
+      alert(JSON.stringify(values, null, 2));
+    },
+  });
 
   const handleClick = () => {
     const formData = {
@@ -36,10 +57,16 @@ export default function LoginView() {
   };
 
   const renderForm = (
-    <>
+      <FormikProvider value={formik}>
+      <Form onSubmit={formik.handleSubmit}>
       <Stack spacing={3}>
         <TextField name="email" label="Correo electrónico" />
-
+        {formik.touched.email && formik.errors.email ? (
+          <Typography variant="body2" color="error">
+              {formik.errors.email}
+            </Typography>
+          ) : null}
+          
         <TextField
           name="password"
           label="Contraseña"
@@ -54,6 +81,11 @@ export default function LoginView() {
             ),
           }}
         />
+        {formik.touched.password && formik.errors.password ? (
+          <Typography variant="body2" color="error">
+              {formik.errors.password}
+          </Typography>
+        ) : null}
       </Stack>
 
       <Stack direction="row" alignItems="center" justifyContent="flex-end" sx={{ my: 3 }}>
@@ -62,17 +94,12 @@ export default function LoginView() {
         </Link>
       </Stack>
 
-      <LoadingButton
-        fullWidth
-        size="large"
-        type="submit"
-        variant="contained"
-        color="info"
-        onClick={handleClick}
-      >
+      <LoadingButton fullWidth size="large" type="submit" variant="contained" color="info" onClick={handleClick}>
         Iniciar Sesion
       </LoadingButton>
-    </>
+    </Form>
+    </FormikProvider>
+  
   );
 
   return (
