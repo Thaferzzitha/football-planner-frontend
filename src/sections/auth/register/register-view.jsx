@@ -1,4 +1,6 @@
+import * as Yup from 'yup';
 import { useState } from 'react';
+import { Form, useFormik, FormikProvider } from 'formik';
 
 import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
@@ -26,6 +28,25 @@ export default function RegisterView() {
 
   const [showPassword, setShowPassword] = useState(false);
 
+  const userSchema = Yup.object({
+    firstName: Yup.string().required('First Name is required'),
+    lastName: Yup.string().required('Last Name is required'),
+    email: Yup.string().email('Invalid email address').required('Email is required'),
+    password: Yup.string().required('Password is required'),
+  });
+
+  const formik = useFormik({
+    initialValues: {
+      firstName: '',
+      lastName: '',
+      email: '',
+    },
+    validationSchema: userSchema,
+    onSubmit: (values) => {
+      alert(JSON.stringify(values, null, 2));
+    },
+  });
+
   const handleClick = () => {
     const formData = {
       firstName: document.getElementsByName('firstName')[0].value,
@@ -38,39 +59,33 @@ export default function RegisterView() {
   };
 
   const renderForm = (
-    <>
-       <Stack spacing={3} sx={{ mb: 5 }}>
-        <TextField name="firstName" label="Nombre" />
-        <TextField name="lastName" label="Apellido" />
-        <TextField name="email" label="Correo electrónico" />
+    <FormikProvider value={formik}>
+      <Form onSubmit={formik.handleSubmit}>
+        <Stack spacing={3} sx={{ mb: 5 }}>
+          <TextField name="firstName" label="Nombre" />
+          <TextField name="lastName" label="Apellido" />
+          <TextField name="email" label="Correo electrónico" />
 
-        <TextField
-          name="password"
-          label="Contraseña"
-          type={showPassword ? 'text' : 'password'}
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
-                  <Iconify icon={showPassword ? 'eva:eye-fill' : 'eva:eye-off-fill'} />
-                </IconButton>
-              </InputAdornment>
-            ),
-          }}
-        />
-      </Stack>
-
-      <LoadingButton
-        fullWidth
-        size="large"
-        type="submit"
-        variant="contained"
-        color="info"
-        onClick={handleClick}
-      >
-        Registrarse
-      </LoadingButton>
-    </>
+          <TextField
+            name="password"
+            label="Contraseña"
+            type={showPassword ? 'text' : 'password'}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
+                    <Iconify icon={showPassword ? 'eva:eye-fill' : 'eva:eye-off-fill'} />
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />
+        </Stack>
+        <LoadingButton fullWidth size="large" type="submit" variant="contained" color="info">
+          Registrarse
+        </LoadingButton>
+      </Form>
+    </FormikProvider>
   );
 
   return (
